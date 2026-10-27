@@ -1,118 +1,169 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# NestJS Learning Journey
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A small NestJS ticket-management API built while learning the fundamentals of NestJS, including modules, controllers, services, DTOs, validation, and dependency injection.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## What this project includes
 
-## Description
+- A `TicketsModule` with an HTTP controller and service
+- In-memory ticket storage
+- Create, list, and retrieve ticket endpoints
+- Optional filtering by ticket status and priority
+- Request validation with `class-validator`
+- Global `/api` route prefix
+- Rejection of unknown request fields
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+> **Current limitation:** tickets are stored in memory. All created tickets are lost when the application restarts, and this project does not use a database yet.
 
-## Project setup
+## Prerequisites
+
+- Node.js
+- npm
+
+## Getting started
+
+Install dependencies:
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+Start the application in development mode:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev
 ```
 
-## Run tests
+The API is available at:
+
+```text
+http://localhost:3000/api
+```
+
+## Available scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run start` | Start the application |
+| `npm run start:dev` | Start the application in watch mode |
+| `npm run start:debug` | Start in watch mode with the Node.js debugger |
+| `npm run build` | Compile the application |
+| `npm run start:prod` | Run the compiled application from `dist` |
+| `npm run format` | Format TypeScript source and test files with Prettier |
+
+## API reference
+
+All routes use the `/api` prefix.
+
+### List tickets
+
+```http
+GET /api/tickets
+```
+
+Optional query parameters:
+
+- `status`: `open` or `closed`
+- `priority`: `low`, `medium`, or `high`
+
+Example:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl "http://localhost:3000/api/tickets?status=open&priority=high"
 ```
 
-## Deployment
+Example response:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+```json
+[
+  {
+    "id": 1,
+    "subject": "Cannot login to account",
+    "description": "User cannot log in to the application.",
+    "priority": "high",
+    "status": "open",
+    "createdAt": "2026-10-11T10:00:00.000Z"
+  }
+]
+```
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Get a ticket
+
+```http
+GET /api/tickets/:id
+```
+
+Example:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+curl http://localhost:3000/api/tickets/1
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+The `id` must be an integer. A missing ticket returns `404 Not Found`.
 
-## Observability
+### Create a ticket
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+```http
+POST /api/tickets
+Content-Type: application/json
+```
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+Request body:
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+```json
+{
+  "subject": "Unable to update profile",
+  "description": "The profile form returns an error when it is submitted.",
+  "priority": "medium"
+}
+```
 
-This project is already instrumented. Create a free account at [observe.nestjs.com](https://observe.nestjs.com), add an application, and paste the generated app key and secret into the `ObserveModule.forRoot()` call in `src/app.module.ts`.
+Example:
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+```bash
+curl -X POST http://localhost:3000/api/tickets ^
+  -H "Content-Type: application/json" ^
+  -d "{\"subject\":\"Unable to update profile\",\"description\":\"The profile form returns an error when it is submitted.\",\"priority\":\"medium\"}"
+```
 
-## Resources
+The `subject` and `description` fields must be non-empty strings. The `priority` field must be `low`, `medium`, or `high`. The API assigns the ticket ID, sets its status to `open`, and generates `createdAt`.
 
-Check out a few resources that may come in handy when working with NestJS:
+Unknown request fields are rejected by the global validation pipe.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Project structure
 
-## Support
+```text
+src/
+├── app.module.ts
+├── main.ts
+└── tickets/
+    ├── ticket.interface.ts
+    ├── tickets.controller.ts
+    ├── tickets.module.ts
+    ├── tickets.service.ts
+    └── dto/
+        ├── create-ticket.dto.ts
+        └── filter-tickets-query.dto.ts
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Learning topics
 
-## Stay in touch
+This project is intended as a progression through common NestJS concepts:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. Bootstrapping an application with `NestFactory`
+2. Organizing features with modules
+3. Handling requests with controllers
+4. Encapsulating application logic in services
+5. Validating request bodies and query parameters with DTOs
+6. Using pipes such as `ParseIntPipe` and `ValidationPipe`
+7. Returning HTTP errors with NestJS exceptions
+
+## Useful resources
+
+- [NestJS documentation](https://docs.nestjs.com)
+- [NestJS controllers](https://docs.nestjs.com/controllers)
+- [NestJS providers](https://docs.nestjs.com/providers)
+- [NestJS validation](https://docs.nestjs.com/techniques/validation)
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is private and currently has no published license.
